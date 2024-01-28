@@ -1,0 +1,60 @@
+# specify the version of docker-compose
+version: "3.8"
+
+# define the services/containers to be run
+services:
+
+  web:
+    # we use depends_on to specify that service depends on another service
+   
+    depends_on: 
+      - api
+  
+    build: ./client
+    
+    ports:
+      - 3000:3000
+    
+    develop:
+      # we specify the files to watch for changes
+      watch:
+        # it'll watch for changes in package.json and package-lock.json and rebuild the container if there are any changes
+        - path: ./client/package.json
+          action: rebuild
+        - path: ./client/package-lock.json
+          action: rebuild
+        # it'll watch for changes in the frontend directory and sync the changes with the container real time
+        - path: ./client
+          target: /app
+          action: sync
+
+  # define the api service/container
+  api: 
+
+    # specify the build context for the api service
+    build: ./server
+    
+    
+    ports: 
+      - 3001:3001
+
+   
+    # establish docker compose watch mode for the api service
+    develop:
+      # specify the files to watch for changes
+      watch:
+        # it'll watch for changes in package.json and package-lock.json and rebuild the container and image if there are any changes
+        - path: ./server/package.json
+          action: rebuild
+        - path: ./server/package-lock.json
+          action: rebuild
+        
+        # it'll watch for changes in the backend directory and sync the changes with the container real time
+        - path: ./server
+          target: /app
+          action: sync
+
+
+# define the volumes to be used by the services
+volumes:
+  qchat:
